@@ -42,6 +42,42 @@ const TodoList = ({
     );
 };
 
+/* AddTodo component */
+const AddTodo = ({
+    onAddClick
+}) => {
+    let input;
+
+    return (
+        <div>
+                <input type="text" ref={ node => { input = node; }}/>
+                <button 
+                    onClick={ () => {
+                        onAddClick(input.value);
+                        input.value = '';
+                    }}
+                    >
+                    Add Todo
+                </button>
+            </div>
+    );
+};
+
+/* Footer component */
+const Footer = ({
+    visibilityFilter,
+    onFilterClick
+}) => {
+    return (
+        <p>
+            Show: 
+            {' '}<FilterLink filter='SHOW_ALL' currentFilter={ visibilityFilter } onClick={ onFilterClick } >All</FilterLink>
+            {' '}<FilterLink filter ='SHOW_ACTIVE' currentFilter={ visibilityFilter } onClick={ onFilterClick } >Active</FilterLink>
+            {' '}<FilterLink filter ='SHOW_COMPLETED' currentFilter={ visibilityFilter } onClick={ onFilterClick } >Completed</FilterLink>
+        </p>
+    );
+};
+
 /* Rest */
 
 let nextTodoId = 0;
@@ -59,47 +95,45 @@ const getVisibleTodos = (todos, filter) => {
     }
 };
 
-const FilterLink = ({ filter, currentFilter, children }) => {
+const FilterLink = ({
+    filter,
+    currentFilter,
+    children,
+    onClick
+}) => {
     if (filter === currentFilter) {
         return <span>{children}</span>
     }
 
     return (
         <a href='#'
-                onClick={ e => {
-                        e.preventDefault();
-                        store.dispatch({
-                            type: 'SET_VISIBILITY_FILTER',
-                            filter
-                        });
-                    }
-                }>
-                {children}
-            </a>
+            onClick={ e => {
+                    e.preventDefault();
+                    onClick(filter);
+                }
+            }>
+            {children}
+        </a>
     );
 };
 
-class TodoApp extends React.Component {
-    render() {
-        const { todos, visibilityFilter } = this.props;
-        const visibleTodos = getVisibleTodos(todos, visibilityFilter);
-
+const TodoApp = ({
+    todos,
+    visibilityFilter
+}) => {
         return (
             <div>
-                <input type="text" ref={ node => { this.input = node; }}/>
-                <button onClick={ () => {
-                    store.dispatch({
-                        type: 'ADD_TODO',
-                        text: this.input.value,
-                        id: nextTodoId++
-                    });
-
-                    this.input.value = '';
-                }}>
-                    Add Todo
-                </button>
+                <AddTodo onAddClick={ (text) => {
+                        store.dispatch({
+                            type: 'ADD_TODO',
+                            id: nextTodoId++,
+                            text
+                        });
+                    } 
+                }
+                />
                 <TodoList 
-                    todos={visibleTodos}
+                    todos={ getVisibleTodos(todos, visibilityFilter) }
                     onTodoClick={
                          (id) => {
                             store.dispatch({
@@ -109,15 +143,17 @@ class TodoApp extends React.Component {
                         }
                     }                    
                 />
-                <p>
-                    Show: 
-                    {' '}<FilterLink filter='SHOW_ALL' currentFilter={ visibilityFilter } >All</FilterLink>
-                    {' '}<FilterLink filter ='SHOW_ACTIVE' currentFilter={ visibilityFilter } >Active</FilterLink>
-                    {' '}<FilterLink filter ='SHOW_COMPLETED' currentFilter={ visibilityFilter } >Completed</FilterLink>
-                </p>
+                <Footer 
+                    visibilityFilter={ visibilityFilter}
+                    onFilterClick={ (filter) => {
+                        store.dispatch({
+                            type: 'SET_VISIBILITY_FILTER',
+                            filter
+                        });
+                    }}
+                />
             </div>
         );
-    }
 }
 
 const render = () => {
