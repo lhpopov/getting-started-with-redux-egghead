@@ -14,7 +14,6 @@ class Counter extends React.Component {
 	            <button onClick={ this.props.onIncrement }>+</button>
 	            <button onClick={ this.props.onDecrement }>-</button>
             </div>
-
         )
     }
 }
@@ -53,7 +52,7 @@ const renderC = () => {
 const store = createStore(counter);
 store.subscribe(renderC);
 
-renderC();
+// renderC();
 
 const addCounter = (list) => {
     return [...list, 0];
