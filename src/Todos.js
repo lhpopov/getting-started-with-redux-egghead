@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import expect from 'expect';
 import deepFreeze from 'deep-freeze';
@@ -53,7 +53,11 @@ const AddTodo = ({
                 <input type="text" ref={ node => { input = node; }}/>
                 <button 
                     onClick={ () => {
-                        onAddClick(input.value);
+                        store.dispatch({
+                            type: 'ADD_TODO',
+                            id: nextTodoId++,
+                            text: input.value
+                        });
                         input.value = '';
                     }}
                     >
@@ -126,6 +130,7 @@ class FilterLink extends React.Component {
 };
 
 /* Link component */
+
 const Link = ({
     active,
     children,
@@ -146,6 +151,42 @@ const Link = ({
     );
 };
 
+/* VisibleTodoList */
+class VisibleTodoList extends Component{
+    componentDidMount() {
+        this.unsubscribe = store.subscribe(() => {
+            this.forceUpdate();
+        });
+    }
+
+    componentWillUnmount() {
+        this.unsubscribe();
+    }
+
+    render(){
+        const props = this.props;
+        const state = store.getState();
+
+        return (
+            <TodoList 
+                todos = { getVisibleTodos(
+                        state.todos, 
+                        state.visibilityFilter
+                    )
+                } 
+                onTodoClick = {
+                    (id) => {
+                        store.dispatch({
+                            type: 'TOGGLE_TODO',
+                            id
+                        });
+                    }
+                }
+            /> 
+        );
+    }
+}
+
 /* Rest */
 
 let nextTodoId = 0;
@@ -163,45 +204,19 @@ const getVisibleTodos = (todos, filter) => {
     }
 };
 
-const TodoApp = ({
-    todos,
-    visibilityFilter
-}) => {
+const TodoApp = () => {
         return (
             <div>
                 <AddTodo onAddClick={ (text) => {
-                        store.dispatch({
-                            type: 'ADD_TODO',
-                            id: nextTodoId++,
-                            text
-                        });
+                        
                     } 
                 }
                 /> 
-                <TodoList 
-                    todos = { getVisibleTodos(todos, visibilityFilter) } 
-                    onTodoClick = {
-                        (id) => {
-                            store.dispatch({
-                                type: 'TOGGLE_TODO',
-                                id
-                            });
-                        }
-                    }
-                /> 
+                <VisibleTodoList /> 
             <Footer />
             </div>
         );
 }
-
-const render = () => {
-    ReactDOM.render(
-        <TodoApp 
-            {...store.getState()}
-        />,
-        document.getElementById('root')
-    );
-};
 
 const todo = (state, action) => {
     switch (action.type) {
@@ -332,8 +347,13 @@ const todoApp = combineReducers({
 });
 
 const store = createStore(todoApp);
-store.subscribe(render);
-render();
+
+
+
+ReactDOM.render(
+    <TodoApp />,
+    document.getElementById('root')
+);
 
 // testAddTodo();
 // testToggleTodo();
