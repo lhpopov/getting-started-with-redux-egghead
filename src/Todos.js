@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import expect from 'expect';
 import deepFreeze from 'deep-freeze';
-import { createStore, combineReducers } from 'redux';
-
+import { combineReducers } from 'redux';
+import { createStore } from 'redux';
 
 /* Todo component */
 const Todo = ({
@@ -44,7 +44,8 @@ const TodoList = ({
 
 /* AddTodo component */
 const AddTodo = ({
-    onAddClick
+    onAddClick,
+    store
 }) => {
     let input;
 
@@ -68,25 +69,28 @@ const AddTodo = ({
 };
 
 /* Footer component */
-const Footer = () => {
+const Footer = ({ store }) => {
     return (
         <p>
             Show: 
             {' '}
             <FilterLink 
                 filter='SHOW_ALL'
+                store={ store }
             >
                  All
              </FilterLink>
             {' '}
             <FilterLink 
                 filter ='SHOW_ACTIVE'
+                store={ store }
             >
                  Active
              </FilterLink>
             {' '}
             <FilterLink 
                 filter ='SHOW_COMPLETED'
+                store={ store }
             >
                  Completed
              </FilterLink>
@@ -97,6 +101,7 @@ const Footer = () => {
 /* FooterLink component */
 class FilterLink extends React.Component {
     componentDidMount() {
+        const { store } = this.props;
         this.unsubscribe = store.subscribe(() => {
             this.forceUpdate();
         });
@@ -108,6 +113,7 @@ class FilterLink extends React.Component {
 
     render() {
         const props = this.props;
+        const { store } = this.props;
         const state = store.getState();
 
         return (
@@ -154,6 +160,7 @@ const Link = ({
 /* VisibleTodoList */
 class VisibleTodoList extends Component{
     componentDidMount() {
+        const { store } = this.props;
         this.unsubscribe = store.subscribe(() => {
             this.forceUpdate();
         });
@@ -165,6 +172,7 @@ class VisibleTodoList extends Component{
 
     render(){
         const props = this.props;
+        const { store } = this.props;
         const state = store.getState();
 
         return (
@@ -204,16 +212,12 @@ const getVisibleTodos = (todos, filter) => {
     }
 };
 
-const TodoApp = () => {
+const TodoApp = ({ store }) => {
         return (
             <div>
-                <AddTodo onAddClick={ (text) => {
-                        
-                    } 
-                }
-                /> 
-                <VisibleTodoList /> 
-            <Footer />
+                <AddTodo store={ store } />
+                <VisibleTodoList store={ store } />
+                <Footer store={ store } />
             </div>
         );
 }
@@ -346,38 +350,11 @@ const todoApp = combineReducers({
     visibilityFilter
 });
 
-const store = createStore(todoApp);
+
 
 
 
 ReactDOM.render(
-    <TodoApp />,
+    <TodoApp store={ createStore(todoApp) }/>,
     document.getElementById('root')
 );
-
-// testAddTodo();
-// testToggleTodo();
-// testRemoveTodo();
-
-// const store = createStore(todoApp);
-
-// console.log('--- Initial state ---');
-// console.log(store.getState());
-
-// store.dispatch({
-//     type: 'ADD_TODO',
-//     id: 0,
-//     text: 'Yo, first todo'
-// });
-
-// console.log('--- Current state ---');
-// console.log(store.getState());
-
-// console.log('--- Dispatching SET_VISIBILITY_FILTER ---');
-// store.dispatch({
-//     type: 'SET_VISIBILITY_FILTER',
-//     filter: 'SHOW_COMPLETED'
-// });
-
-// console.log('--- Current state ---');
-// console.log(store.getState());
