@@ -9,7 +9,31 @@ import deepFreeze from 'deep-freeze';
 
 import { combineReducers, createStore } from 'redux';
 import { Provider, connect } from 'react-redux';
-// import { connect } from 'react-redux';
+
+
+/* Action cretors */
+let nextTodoId = 0;
+const addTodo = (text) => {
+    return {
+        type: 'ADD_TODO',
+        id: nextTodoId++,
+        text
+    };
+};
+
+const setVisibilityFilter = (filter) => {
+    return {
+        type: 'SET_VISIBILITY_FILTER',
+        filter
+    };
+};
+
+const toggleTodo = (id) => {
+    return {
+        type: 'TOGGLE_TODO',
+        id
+    };
+};
 
 /* Todo component */
 const Todo = ({
@@ -55,16 +79,10 @@ let AddTodo = ({ dispatch }) => {
     return (
         <div>
                 <input type="text" ref={ node => { input = node; }}/>
-                <button 
-                    onClick={ () => {
-                        dispatch({
-                            type: 'ADD_TODO',
-                            id: nextTodoId++,
-                            text: input.value
-                        });
-                        input.value = '';
-                    }}
-                    >
+                <button onClick={ () => {
+                    dispatch(addTodo(input.value));
+                    input.value = '';
+                }}>
                     Add Todo
                 </button>
             </div>
@@ -120,10 +138,9 @@ const mapStateToLinkProps = (
 const mapDispatchToLinkProps = (dispatch, ownProps) => {
     return {
         onClick: () => {
-            dispatch({
-                type: 'SET_VISIBILITY_FILTER',
-                filter: ownProps.filter
-            });
+            dispatch(
+                setVisibilityFilter(ownProps.filter)
+            );
         }
     };
 };
@@ -169,10 +186,7 @@ const mapStateTodoListProps = (state) => {
 const mapDispatchToTodoListProps = (dispatch) => {
     return {
         onTodoClick: (id) => {
-            dispatch({
-                type: 'TOGGLE_TODO',
-                id
-            });
+            dispatch(toggleTodo(id));
        }
     };
 };
@@ -182,46 +196,7 @@ const VisibleTodoList = connect(
     mapDispatchToTodoListProps
 )(TodoList);
 
-// class VisibleTodoList extends Component{
-//     componentDidMount() {
-//         const { store } = this.context;
-//         this.unsubscribe = store.subscribe(() => {
-//             this.forceUpdate();
-//         });
-//     }
-
-//     componentWillUnmount() {
-//         this.unsubscribe();
-//     }
-
-//     render(){
-//         const props = this.props;
-//         const { store } = this.context;
-//         const state = store.getState();
-
-//         return (
-//             <TodoList 
-               
-//                 onTodoClick = {
-//                     (id) => {
-//                         store.dispatch({
-//                             type: 'TOGGLE_TODO',
-//                             id
-//                         });
-//                     }
-//                 }
-//             /> 
-//         );
-//     }
-// }
-
-// VisibleTodoList.contextTypes = {
-//     store: PropTypes.object
-// };
-
 /* Rest */
-
-let nextTodoId = 0;
 
 const getVisibleTodos = (todos, filter) => {
     switch (filter) {
