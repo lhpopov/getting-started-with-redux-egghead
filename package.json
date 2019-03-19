@@ -3,8 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "react": "^16.8.4",
-    "react-dom": "^16.8.4",
     "react-scripts": "2.1.8"
   },
   "scripts": {
@@ -26,6 +24,8 @@
     "deep-freeze": "0.0.1",
     "expect": "^24.5.0",
     "prop-types": "^15.7.2",
+    "react": "^16.8.4",
+    "react-dom": "^16.8.4",
     "react-redux": "^6.0.1",
     "redux": "^4.0.1"
   }
